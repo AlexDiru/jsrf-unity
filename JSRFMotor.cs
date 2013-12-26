@@ -6,33 +6,45 @@ using System.Collections;
 public class JSRFMotor : MonoBehaviour {
 	
 	private float acceleration = 0.3f;
-	private float currentSpeed = 20f;
+	private float currentSpeed = 14f;
 	private float maxSpeed = 2f;
-	private float rotationOnTurnInDeg = 2f;
-
-	// Use this for initialization
+	private float rotationOnTurnInDeg = 75f;
+	private float xAxisMovementReduction = 1f;//0.18f;
+	
 	void Start () {
 	
 	}
 	
-	// Update is called once per frame
 	void Update () {
 		float inputX = Input.GetAxis("Horizontal");
         float inputY = Input.GetAxis("Vertical");
 		
-        // If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
-        //float inputModifyFactor = inputX != 0.0f && inputY != 0.0f ? .7071f : 1.0f;
+		//Make sure the following is true:
+		//inputX + inputY <= 1
+		//Note: some irrelevant calculations to make more readable, optimise later
+		if (inputX + inputY > 1) {
+			float sum = inputX + inputY;
+			float ratio = sum/1;
+			inputX /= ratio;
+			inputY /= ratio;
+		}
 		
-		//inputX *= inputModifyFactor;
-		//inputY *= inputModifyFactor;
+		//Movement
+		float xAxisMovement = inputX * xAxisMovementReduction;
+		float zAxisMovement = inputY * currentSpeed;
+		Vector3 moveDirection;
 		
-		
-		
-		Vector3 moveDirection = new Vector3(inputX , 0, inputY ) * currentSpeed * Time.deltaTime;
+		//If only moving left or right we want to emphasise that the character is
+		//skating in a circle so the movement on the x axis is maximised
+		//Otherwise when moving forward and turning, the x axis movement is minimised
+		//if (inputY == 0)
+		//	moveDirection = new Vector3(inputX * currentSpeed, 0, 0) * Time.deltaTime;
+		//else 
+			moveDirection = new Vector3(xAxisMovement, 0, zAxisMovement) * Time.deltaTime;
 		GetComponent<CharacterController>().Move(transform.TransformDirection(moveDirection));
 		
-		//Rotate
-		//float yAxisRotation = inputX * Time.deltaTime * rotationOnTurnInDeg;
-		//transform.rotation = new Quaternion(transform.rotation.x, (transform.rotation.y + yAxisRotation)%(2*Mathf.PI), transform.rotation.z, transform.rotation.w);
+		//Rotation
+		float yAxisRotation = inputX * rotationOnTurnInDeg;
+		transform.Rotate(new Vector3(0, yAxisRotation, 0) * Time.deltaTime);
 	}
 }
