@@ -6,20 +6,21 @@ using System.Collections;
 public class JSRFArenaCamera : MonoBehaviour
 {
 	
-	private Transform target = GameObject.FindGameObjectWithTag("Player").transform;
-	private float height = 50f;
+	private Transform target;
+	private float height = 25f;
 
 	// Use this for initialization
 	void Start ()
 	{
+		target = GameObject.FindGameObjectWithTag("Player").transform;
 		
+		transform.position = new Vector3(target.position.x, target.position.y + height, target.position.z);
+		transform.LookAt(target.position);
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
-		transform.position = target.position - (target.forward * distanceBehindTarget);
-		transform.LookAt(target.position);
 	}
 }
 
